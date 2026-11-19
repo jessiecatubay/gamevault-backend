@@ -1,0 +1,30 @@
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
+  }
+}
+
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConflictError";
+  }
+}
+
+export class UnauthorizedError extends Error {
+  constructor(message = "Authentication is required") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
+export class ExternalServiceError extends Error {
+  constructor(
+    message: string,
+    readonly statusCode: number,
+  ) {
+    super(message);
+    this.name = "ExternalServiceError";
+  }
+}

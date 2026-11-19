@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GameStatus {
+  BACKLOG
+  PLAYING
+  COMPLETED
+}
+
+model Game {
+  id        Int        @id @default(autoincrement())
+  userId    Int?
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String     @db.VarChar(160)
+  titleKey  String     @db.VarChar(160)
+  igdbId    Int?
+  genre     String     @db.VarChar(100)
+  description String?  @db.Text
+  releaseDate DateTime?
+  developer String?    @db.VarChar(160)
+  publisher String?    @db.VarChar(160)
+  platforms String[]   @default([])
+  rating    Float?
+  category  String?    @db.VarChar(80)
+  status    GameStatus @default(BACKLOG)
+  favorite  Boolean    @default(false)
+  image     String?    @db.Text
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([status])
+  @@index([favorite])
+  @@index([title])
+  @@index([userId])
+  @@unique([userId, titleKey])
+  @@unique([userId, igdbId])
+}
+
+model User {
+  id           Int             @id @default(autoincrement())
+  email        String          @unique @db.VarChar(254)
+  passwordHash String
+  createdAt    DateTime        @default(now())
+  games        Game[]
+  wishlist     WishlistEntry[]
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model WishlistEntry {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String   @db.VarChar(160)
+  titleKey    String   @db.VarChar(160)
+  image       String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  platform    String   @db.VarChar(80)
+  genre       String   @db.VarChar(100)
+  releaseDate DateTime?
+  notes       String?  @db.Text
+  addedAt     DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, addedAt])
+  @@index([userId, platform])
+  @@index([userId, title])
+  @@unique([userId, titleKey])
+}
